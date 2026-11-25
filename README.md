@@ -1,41 +1,56 @@
-# Breast Cancer Tumor Classification
+# Heart Disease Classifier
 
-A convolutional neural network (CNN) that classifies microscopic breast biopsy images as **benign** or **malignant**, compared against transfer learning models from TensorFlow Hub. Built as a graduate research project (December 2022).
+A machine learning project that predicts whether a patient has heart disease from clinical measurements. It explores the data, then compares three classification models in Scikit-Learn.
 
-> For research and educational purposes only. Not for clinical use.
+> For educational purposes only. Not for clinical use.
 
 ## Dataset
 
-- Kaggle sample of the BreakHis breast cancer histopathology dataset (400X magnification), 700 x 460 px RGB PNG images
-- 1,148 training images (371 benign, 777 malignant) and 545 test images (176 benign, 369 malignant)
-- 15% of the training images were held out for validation
-- Training images were augmented with horizontal flips
-- Class imbalance (roughly 2:1 malignant to benign) is a key limitation of the data
+`heart-disease.csv` has 303 patient records, 13 clinical features and a binary target (1 = heart disease, 0 = no heart disease). There are no missing values. The classes are fairly balanced, with 165 disease and 138 no-disease records.
 
-The images are not included in this repository. See the Kaggle "Breakhis 400X" dataset and the original BreakHis paper (Spanhol et al., IEEE Transactions on Biomedical Engineering, 2016).
+| Feature | Description |
+|---|---|
+| `age` | Age in years |
+| `sex` | 1 = male, 0 = female |
+| `cp` | Chest pain type (0 to 3) |
+| `trestbps` | Resting blood pressure (mm Hg) |
+| `chol` | Serum cholesterol (mg/dl) |
+| `fbs` | Fasting blood sugar above 120 mg/dl (1 = true, 0 = false) |
+| `restecg` | Resting electrocardiographic results (0 to 2) |
+| `thalach` | Maximum heart rate achieved |
+| `exang` | Exercise-induced angina (1 = yes, 0 = no) |
+| `oldpeak` | ST depression induced by exercise relative to rest |
+| `slope` | Slope of the peak exercise ST segment (0 to 2) |
+| `ca` | Number of major vessels (0 to 3) colored by fluoroscopy |
+| `thal` | Thallium stress test result (1, 3, 6 or 7) |
 
 ## Approach
 
-**Custom CNN (Keras):** four convolution blocks (32, 64, 128 and 256 filters, 3x3 kernels) with max pooling, dropout (25%), a 64-unit dense layer, and a sigmoid output. Trained with binary cross-entropy and the Adam optimizer, with early stopping and model checkpoints. Batch sizes of 8, 16 and 32 were compared.
-
-**Transfer learning (TensorFlow Hub):** Inception V3, Inception ResNet V2 and EfficientNet V2, all trained with a batch size of 16.
+1. **Exploratory data analysis:** class balance, missing values, summary statistics, a correlation heatmap, and plots of how chest pain type, sex, age and maximum heart rate relate to heart disease.
+2. **Modeling:** an 80/20 train/test split (random seed 42), then three classifiers trained and scored on the test set: logistic regression, K-nearest neighbors and random forest.
 
 ## Results
 
-| Model | Validation accuracy | Test accuracy | Test precision | Test recall |
-|---|---|---|---|---|
-| Custom CNN (batch size 16) | 89.60% | 86% | 0.88 | 0.91 |
-| Inception ResNet V2 | 91.91% | 86% | 0.88 | 0.92 |
-| EfficientNet V2 | 86.13% | 84% | 0.85 | 0.93 |
-| **Inception V3** | **92.49%** | **88%** | **0.88** | **0.96** |
+| Model | Test accuracy |
+|---|---|
+| Logistic Regression | 88.5% |
+| Random Forest | 83.6% |
+| K-Nearest Neighbors | 68.9% |
 
-Inception V3 performed best overall. The custom CNN's validation accuracy fluctuated more between epochs than the pretrained models, and test accuracy was lower than validation accuracy across all models, which suggests some overfitting. Because this is a healthcare problem, recall on malignant cases matters more than raw accuracy. The full discussion is in the report.
+Logistic regression performed best. The test set has only 61 records, so these scores can shift with a different split.
+
+## Next steps
+
+- Hyperparameter tuning with `RandomizedSearchCV` and `GridSearchCV`
+- Cross-validation for more reliable estimates
+- Precision, recall and F1 alongside accuracy
+- Feature scaling
 
 ## Files
 
-- `breast_cancer.ipynb`: data preparation, model training and evaluation
-- `FinalReport.pdf`: full write-up of the methods, results and discussion
+- `end-to-end-heart-disease-classification.ipynb`: data exploration, modeling and evaluation
+- `heart-disease.csv`: dataset
 
 ## Running the notebook
 
-The notebook was written for Google Colab, with the data stored in Google Drive. To run it elsewhere, download the dataset and update the file paths in the notebook. It uses TensorFlow, TensorFlow Hub, scikit-learn, pandas, NumPy, Matplotlib, Pillow and split-folders.
+Install Python 3 with Jupyter, then install the dependencies: `pip install numpy pandas matplotlib seaborn scikit-learn`. Open `end-to-end-heart-disease-classification.ipynb` and run the cells in order, keeping `heart-disease.csv` in the same folder.
